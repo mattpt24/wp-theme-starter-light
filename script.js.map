@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/js/main.js"],
+  "sourcesContent": ["console.log(\"Hell!\");"],
+  "mappings": "MAAA,QAAQ,IAAI,OAAO",
+  "names": []
+}
