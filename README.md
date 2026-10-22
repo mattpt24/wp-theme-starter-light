@@ -50,62 +50,42 @@ your-theme-folder/
 
 
 
-
-🚀 Quick Start (New Projects)
-1. Copy Template Files
-Copy package.json, watcher.js, src/, and the relevant hooks in functions.php into your new theme directory (wp-content/themes/your-theme-name/).
-
-2. Update Theme Metadata
-Edit the header comment in style.css (or src/scss/style.scss) to match your new theme details:
-
-CSS
-/*
-Theme Name: Your Theme Name
-Author: Your Name
-Version: 1.0.0
-*/
-
-
-3. Install Dependencies
-In your terminal, navigate to your theme root directory and run:
-
-Bash
-npm install
-4. Start Development Mode
-Run the concurrent dev command to start watching, compiling, minifying, and live-reloading:
-
-Bash
-npm run dev
-Open your local development site (e.g., [http://your-site.local](http://your-site.local)). Open the browser Developer Console (Cmd + Option + I) to verify the connection message:
-
-⚡ Connected to LiveReload!
+📖 WordPress Theme Development Cheat Sheet  --------------------------------------------------
 
 
 
 
 
-📜 Configuration Code
+* WordPress Display Functions
 
-package.json
-JSON
-{
-  "name": "custom-wp-theme",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "watch:scss": "sass src/scss/style.scss style.css --style=compressed --watch",
-    "watch:js": "esbuild src/js/main.js --outfile=script.js --bundle --minify --sourcemap --watch",
-    "watch:reload": "node watcher.js",
-    "dev": "run-p watch:scss watch:js watch:reload"
-  },
-  "devDependencies": {
-    "chokidar": "^4.0.0",
-    "esbuild": "^0.25.0",
-    "npm-run-all2": "^7.0.0",
-    "sass": "^1.80.0",
-    "ws": "^8.18.0"
-  }
-}
+
+HEADER CONTENTS                                    ------   <?php echo get_header();?>
+
+FOOTER CONTENTS                                    ------   <?php echo get_footer();?>
+
+TEMPLATE PART                                      ------   <?php echo get_template_part('includes/components/page-title-banner')?>
+
+PAGE / POST TITLE                                  ------   <?php echo the_title();?>
+
+CONTENT                                            ------   <?php echo the_content();?>
+
+SINGLE POST TYPE PAGE LINK                         ------   <?php echo the_permalink();?>
+
+EXCERPT                                            ------   <?php echo the_excerpt();?>
+
+IMAGES FROM 'IMAGES' FOLDER                        ------   <?php echo get_theme_file_uri('assets/images/picture.png');?>
+
+LINK TO SPECIFIC PAGE                              ------   <?php echo site_url('/page-name');?>
+
+ACF CUSTOM FIELDS                                  ------   <?php echo the_field('name_of_custom_field')?>
+
+ACF CUSTOM FIELDS FROM ANOTHER PAGE                ------   <?php echo the_field('name_of_custom_field', 20)?>
+
+CUSTOM 'CUSTOMISE' CONTROLS                        ------   <?php echo get_theme_mod('name-of-custom-theme-mod')?> 
+
+POST SHORTCODE                                     ------   <?php echo do_shortcode('[your_shortcode]')?> 
+
+SEARCH FORM                                        ------   <?php get_search_form(); ?>
 
 
 
@@ -114,97 +94,399 @@ JSON
 
 
 
-watcher.js
-import { WebSocketServer } from 'ws';
-import chokidar from 'chokidar';
+* WordPress File Uses
 
-const wss = new WebSocketServer({ port: 35729 });
-let clients = new Set();
 
-wss.on('connection', (ws) => {
-  clients.add(ws);
-  console.log('⚡ Browser connected to LiveReload');
-  ws.on('close', () => clients.delete(ws));
-});
+header.php          -----   Stores <?php wp_head();?>, any addtional <head> contents as well as global header elements like <nav>
 
-function notifyReload(file) {
-  console.log(`[Reload] File changed: ${file}`);
-  clients.forEach((client) => {
-    if (client.readyState === 1) {
-      client.send(JSON.stringify({ type: 'reload', file }));
-    }
-  });
-}
+footer.php          -----   Stores <?php wp_footer();?>, any addtional scripts, as well as global footer elements like <footer>
 
-const watcher = chokidar.watch(['style.css', 'script.js', '**/*.php'], {
-  ignored: [/node_modules/, /\.git/],
-  persistent: true,
-  ignoreInitial: true,
-  usePolling: true,
-  interval: 100
-});
+functions.php       -----   Used for enqueing scripts / stylesheets aswell as adding theme support for certain features and creating 'Customise' controls
 
-watcher.on('change', (path) => notifyReload(path));
-console.log('⚡ Native LiveReload server running on port 35729...');
+front-page.php      -----   Front page of the website. Anything on this page will be the first thing people see
+
+single.php          -----   Used for individual 'post' pages (NOT custom post type). 
+
+page.php            -----   Content displayed on here will be applied to any pages not assigned a specific page-{page-slug}.php or page template
+
+search.php          -----   Page used for search query functionality and displaying results
+
+404.php             -----   404 Page (Pages searched that don't exist or were deleted)
+
+screenshot.png      -----   Provides the thumbnail for the theme in the WP Admin Apperance > Theme page
 
 
 
 
 
-functions.php
-PHP
+
+
+
+* WordPress page naming conventions
+
+
+- SINGLE POST & CUSTOM POST TYPE PAGES
+
+single-{custom-post-type-slug}.php                           ----  Used for individual pages for your custom post types
+
+
+
+- PAGES / TEMPLATES 
+
+page-{page-slug}.php                                         ----  Will automatically be assigned to the page of the same name.
+// Template Name: Your Page Name Template                    ----  Add underneath get_header(); of any page php file and select in correspsonding page on WP to display for specific pages
+
+
+
+- ARCHIVE PAGES (Make sure post type has this initialed)
+
+archive-{custom-post-type-slug}.php                          ----  Used for pages that display all of a post type (ie. Projects)
+
+
+
+
+
+
+
+
+
+
+
+
+* Wordpress Function Examples: 
+
+
+ 
+
+DISPLAY MENU
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    <?php
+    wp_nav_menu( array(
+                    'menu'           => 'Your Menu Name',
+                    'theme_location' => 'main-menu',
+                    'depth'    => 2
+                ) );
+    ?>
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+THE WORDPRESS LOOP (PULL IN POSTS / CUSTOM POST TYPES )
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+<?php 
+
+$anyName = new WP_Query(array(
+'posts_per_page' => -1,                    
+'post_type'      => 'your-post-type-name', 
+'orderby'        => 'post_date',
+'order'          => 'DESC',
+'meta_tag'       => 'custom-field-name',  
+'meta_value'     => 'custom-field-value' 
+ ));
+ 
+
+while($anyName->have_posts()) {
+    $anyName->the_post(); ?>
+
+    <h1><?php echo the_title();?></h1>
+
+<?php 
+wp_reset_query();
+}?>
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+MANUALLY CREATING CUSTOM POST TYPES 
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+1. Create an 'mu-plugins' folder in your local WP sites 'wp-content' folder
+
+2. Create a 'custom-post-type.php' within the 'mu-plugins' folder
+
+3. In this file use the below function to create custom post types (Using 'Projects' as an example)
+
+4. Make sure there is NO white space in this file as it breaks WP when live
+
+* USE ACF plugin by 'WP Engine' to assign your custom post type custom fields
+
+
+!!! Alternatively you can just create Custom Post Types in ACF or alternative plugins !!!
+
+
+
+
+
 <?php
 
-function theme_enqueue_scripts() {
-    $css_path = get_template_directory() . '/style.css';
-    if (file_exists($css_path)) {
-        wp_enqueue_style('theme-style', get_stylesheet_uri(), [], filemtime($css_path));
-    }
+function custom_post_types() {
+    register_post_type('Projects', array(
+        'supports' => array('title', 'except'),
+        'rewrite' => array('slug' => 'projects'),
+        'has_archive' => true,
+        'public' => true,
+        'labels' => array(
+            'name' => 'Projects',
+            'add_new_item' => 'Add New Project',
+            'edit_item' => 'Edit Project',
+            'all_items' => 'All Projects',
+            'singular_name' => 'Project'
+        ),
+        'menu_icon' => 'dashicons-admin-home',
+    ));
 
-    $js_path = get_template_directory() . '/script.js';
-    if (file_exists($js_path)) {
-        wp_enqueue_script('theme-script', get_template_directory_uri() . '/script.js', [], filemtime($js_path), true);
-    }
 }
-add_action('wp_enqueue_scripts', 'theme_enqueue_scripts');
 
-add_action('wp_head', function() {
-    $host = $_SERVER['HTTP_HOST'] ?? '';
-    $is_local = str_contains($host, '.local') || str_contains($host, 'localhost') || str_contains($host, '127.0.0.1');
+add_action('init', 'custom_post_types');
 
-    if (!$is_local) {
-        return;
+?>
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+CREATING NEW CUSTOM 'CUSTOMISE' CONTROL FOR GLOBAL FIELDS (ie Company Contact Details)
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+function new_section($wp_customize) {
+
+
+    $wp_customize->add_section('section-name', array(
+        'title' => 'New Section Name'
+    ));
+    
+    
+
+    $wp_customize->add_setting('section-name-title', array(
+        'default' => 'This will display as a default!',
+    ));
+    
+
+
+    $wp_customize->add_control(new WP_Customize_Control($wp_customize, 'section-name-title-control', array(
+        'label' => 'Section Title',
+        'section' => 'section-name',           
+        'settings' => 'section-name-title'   
+        'type' => 'text'                        
+    )));    
+    
     }
-    ?>
-    <script>
-      (function() {
-        const socket = new WebSocket('ws://localhost:35729');
 
-        socket.onopen = () => console.log('⚡ Connected to LiveReload!');
 
-        socket.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          if (data.file.endsWith('.css')) {
-            const links = document.getElementsByTagName('link');
-            for (let link of links) {
-              if (link.rel === 'stylesheet' && link.href.includes('style.css')) {
-                const url = new URL(link.href);
-                url.searchParams.set('v', Date.now());
-                link.href = url.href;
-              }
+    
+    // RUNS THE ABOVE FUNCTION 
+    add_action('customize_register', 'new_section');
+
+?>
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+PULL IN NAMES OF CHILD PAGES TO SPECIFIC PARENT EXCEPT THE PAGE ITS ON
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+            <?php 
+                if ( 104 == $post->post_parent ) {
+                $pages = get_pages( [
+                'sort_order'   => 'ASC',
+                'sort_column'  => 'post_title',
+                'hierarchical' => 1,
+                'exclude'      => get_the_ID(),
+                'include'      => '',
+                'meta_key'     => '',
+                'meta_value'   => '',
+                'authors'      => '',
+                'child_of'     => 104,
+                'parent'       => -1,
+                'exclude_tree' => '',
+                'number'       => '',
+                'offset'       => 0,
+                'post_type'    => 'page',
+                'post_status'  => 'publish',
+            ] );
+
+            foreach( $pages as $post ){
+                setup_postdata( $post );
+                ?>
+                <div class="about-page-link"><a href="<?php echo the_permalink();?>"><?php echo the_title();?></a></div>
+                <?php
             }
-          } else {
-            window.location.reload();
-          }
-        };
 
-        socket.onerror = () => {
-          console.warn('LiveReload server not active on port 35729');
-        };
-      })();
-    </script>
-    <?php
-});
+            wp_reset_postdata();
+                }
+            ?>
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
+
+
+
+
+
+
+
+
+SHOW THE PREVIOUS & NEXT POST
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+<?php
+    if ( is_singular( 'post' ) ) {
+        the_post_navigation(
+            array(
+                'prev_text' => '<div class="next-post">' . __( '<i class="fa-solid fa-arrow-left"></i> &nbsp;Previous post') . '</div> ' .
+                    '<div class="post-title">%title</div>',
+                    'next_text' => '<div class="next-post">' . __( '<i class="fa-solid fa-arrow-right"></i> &nbsp; Next post') . '</div> ' .
+                    '<div class="post-title">%title</div>'
+            )
+        );
+    }
+?>
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+MAKE CONTENT ONLY APPEAR ON CERTAIN PAGES
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+PAGES 
+
+ <?php if (is_page(22)){?>
+        <h1>This only appears on page 22</h1>
+ <?php } ?>
+
+
+
+SINGLE POST TYPES 
+
+<?php if (is_single(22)){?>
+    <h1>This only appears on a single post type with an id of 22</h1>
+<?php } ?>
+
+
+
+ARCHIVE PAGES 
+
+
+<?php if ( is_post_type_archive( 'project' ) ) { ?>
+    <h1>This only appears on a single post type with an id of 22</h1>
+<?php } ?>
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+SETTING UP 'FILTER EVERYTHING' PLUG IN. 
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+* Without the PRO version Filter Everything can only be implemented on archive-{post-type}.php pages.
+* Make sure your post type has Archives initialised either with 'has_archive => true' on in any plug ins set up with.
+* Make sure you post type has your filters created and assigned to them using ACF.
+* Once archive page has been created and filters have been configured post [fe_widget] shortcode into that file. 
+* Use the following function (modified by Filter Everything) to pull in your custom post type you wish to be filterable
+
+
+
+        <?php
+        if (have_posts()) :
+            while (have_posts()) :
+                the_post();
+                if (get_post_type() === 'testimonial') { 
+                    ?>
+                    <div class="testimonial">
+                        <h1><a class="txt-black" href="<?php echo the_permalink();?>"><?php the_title(); ?></a></h1>
+                        <!-- <p><?php echo esc_html(get_field('testimonial_content')); ?></p> -->
+                    </div>
+                    <?php
+                }
+            endwhile;
+        else :
+            echo '<p>No testimonials found.</p>';
+        endif;
+        ?>
