@@ -21,6 +21,15 @@ npm run dev
 
 
 
+🛠 Troubleshooting
+Port Conflict (EADDRINUSE: :::35729)
+If a previous session hung and locked port 35729, kill the process using:
+
+Bash
+lsof -ti :35729 | xargs kill -9
+
+
+
 
 📁 Starter Directory Structure
 Plaintext
@@ -80,7 +89,7 @@ Open your local development site (e.g., [http://your-site.local](http://your-sit
 package.json
 JSON
 {
-  "name": "custom-wp-theme-starter",
+  "name": "custom-wp-theme",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -90,13 +99,14 @@ JSON
     "dev": "run-p watch:scss watch:js watch:reload"
   },
   "devDependencies": {
-    "chokidar": "^3.6.0",
-    "esbuild": "^0.20.0",
-    "npm-run-all": "^4.1.5",
-    "sass": "^1.71.0",
-    "ws": "^8.16.0"
+    "chokidar": "^4.0.0",
+    "esbuild": "^0.25.0",
+    "npm-run-all2": "^7.0.0",
+    "sass": "^1.80.0",
+    "ws": "^8.18.0"
   }
 }
+
 
 
 
@@ -198,11 +208,3 @@ add_action('wp_head', function() {
 
 
 
-
-
-🛠 Troubleshooting
-Port Conflict (EADDRINUSE: :::35729)
-If a previous session hung and locked port 35729, kill the process using:
-
-Bash
-lsof -ti :35729 | xargs kill -9
